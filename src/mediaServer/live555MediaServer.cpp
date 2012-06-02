@@ -21,7 +21,11 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "DynamicRTSPServer.hh"
 #include "version.hh"
 
+#ifndef WINCE
 int main(int argc, char** argv) {
+#else
+int _tmain(int argc, _TCHAR* argv[]){
+#endif
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);

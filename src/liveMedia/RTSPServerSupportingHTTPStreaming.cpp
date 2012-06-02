@@ -20,8 +20,14 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "RTSPServerSupportingHTTPStreaming.hh"
 #include "RTSPCommon.hh"
+#ifndef _WIN32_WCE
 #include <sys/stat.h>
+#endif
 #include <time.h>
+
+#ifdef _WIN32_WCE
+#include <wince.h>
+#endif
 
 RTSPServerSupportingHTTPStreaming*
 RTSPServerSupportingHTTPStreaming::createNew(UsageEnvironment& env, Port rtspPort,

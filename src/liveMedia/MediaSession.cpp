@@ -1086,10 +1086,12 @@ Boolean MediaSubsession::createSourceObjects(int useSpecialRTPoffset) {
       fReadSource = BasicUDPSource::createNew(env(), fRTPSocket);
       fRTPSource = NULL; // Note!
       
+#ifndef DR400
       if (strcmp(fCodecName, "MP2T") == 0) { // MPEG-2 Transport Stream
 	fReadSource = MPEG2TransportStreamFramer::createNew(env(), fReadSource);
 	// this sets "durationInMicroseconds" correctly, based on the PCR values
       }
+#endif
     } else {
       // Check "fCodecName" against the set of codecs that we support,
       // and create our RTP source accordingly
@@ -1097,7 +1099,9 @@ Boolean MediaSubsession::createSourceObjects(int useSpecialRTPoffset) {
       // (Also, add more fmts that can be implemented by SimpleRTPSource#####)
       Boolean createSimpleRTPSource = False; // by default; can be changed below
       Boolean doNormalMBitRule = False; // default behavior if "createSimpleRTPSource" is True
-      if (strcmp(fCodecName, "QCELP") == 0) { // QCELP audio
+if (false){
+#ifndef DR400
+}     else if (strcmp(fCodecName, "QCELP") == 0) { // QCELP audio
 	fReadSource =
 	  QCELPAudioRTPSource::createNew(env(), fRTPSocket, fRTPSource,
 					 fRTPPayloadFormat,
@@ -1202,11 +1206,13 @@ Boolean MediaSubsession::createSourceObjects(int useSpecialRTPoffset) {
 	  = H263plusVideoRTPSource::createNew(env(), fRTPSocket,
 					      fRTPPayloadFormat,
 					      fRTPTimestampFrequency);
+#endif
       } else if (strcmp(fCodecName, "H264") == 0) {
 	fReadSource = fRTPSource
 	  = H264VideoRTPSource::createNew(env(), fRTPSocket,
 					  fRTPPayloadFormat,
 					  fRTPTimestampFrequency);
+#ifndef DR400
       } else if (strcmp(fCodecName, "DV") == 0) {
 	fReadSource = fRTPSource
 	  = DVVideoRTPSource::createNew(env(), fRTPSocket,
@@ -1232,6 +1238,7 @@ Boolean MediaSubsession::createSourceObjects(int useSpecialRTPoffset) {
 						 fRTPTimestampFrequency,
 						 mimeType);
 	delete[] mimeType;
+#endif
       } else if (  strcmp(fCodecName, "PCMU") == 0 // PCM u-law audio
 		   || strcmp(fCodecName, "GSM") == 0 // GSM audio
 		   || strcmp(fCodecName, "DVI4") == 0 // DVI4 (IMA ADPCM) audio

@@ -141,7 +141,12 @@ void ByteStreamFileSource::doReadFromFile() {
     fFrameSize = fread(fTo, 1, fMaxSize, fFid);
   } else {
     // For non-seekable files (e.g., pipes), call "read()" rather than "fread()", to ensure that the read doesn't block:
-    fFrameSize = read(fileno(fFid), fTo, fMaxSize);
+#ifdef _WIN32_WCE
+		fFrameSize = read((int)fileno(fFid), fTo, fMaxSize);
+#else
+		fFrameSize = read(fileno(fFid), fTo, fMaxSize);
+#endif
+    
   }
   if (fFrameSize == 0) {
     handleClosure(this);

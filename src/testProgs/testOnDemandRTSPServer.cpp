@@ -21,6 +21,10 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
 
+#if defined(DR400) && defined(DR264Live)
+#include "H264VideoLiveServerMediaSubsession.hh"
+#endif
+
 UsageEnvironment* env;
 
 // To make the second and subsequent client for each stream reuse the same
@@ -43,7 +47,11 @@ static void onMatroskaDemuxCreation(MatroskaFileServerDemux* newDemux, void* /*c
   newMatroskaDemuxWatchVariable = 1;
 }
 
+#ifndef WINCE
 int main(int argc, char** argv) {
+#else
+int _tmain(int argc, _TCHAR* argv[]){
+#endif
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   env = BasicUsageEnvironment::createNew(*scheduler);
@@ -72,6 +80,7 @@ int main(int argc, char** argv) {
   // "ServerMediaSession" object, plus one or more
   // "ServerMediaSubsession" objects for each audio/video substream.
 
+#ifndef DR400
   // A MPEG-4 video elementary stream:
   {
     char const* streamName = "mpeg4ESVideoTest";
@@ -85,11 +94,16 @@ int main(int argc, char** argv) {
 
     announceStream(rtspServer, sms, streamName, inputFileName);
   }
+#endif
 
   // A H.264 video elementary stream:
   {
     char const* streamName = "h264ESVideoTest";
+#ifdef WINCE
+	char const* inputFileName = "temp\\slamtv10.264";
+#else
     char const* inputFileName = "test.264";
+#endif
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
 				      descriptionString);
@@ -100,6 +114,22 @@ int main(int argc, char** argv) {
     announceStream(rtspServer, sms, streamName, inputFileName);
   }
 
+#if defined(DR400) && defined(DR264Live)
+  // A H.264 video elementary stream:
+  {
+	char const* streamName = "ch0";
+
+    ServerMediaSession* sms
+      = ServerMediaSession::createNew(*env, streamName, streamName,
+				      descriptionString);
+    sms->addSubsession(H264VideoLiveServerMediaSubsession::createNew(*env, streamName, reuseFirstSource));
+    rtspServer->addServerMediaSession(sms);
+
+    //announceStream(rtspServer, sms, streamName, inputFileName);
+  }
+#endif
+
+#ifndef DR400
   // A MPEG-1 or 2 audio+video program stream:
   {
     char const* streamName = "mpeg1or2AudioVideoTest";
@@ -326,7 +356,9 @@ int main(int argc, char** argv) {
 
     announceStream(rtspServer, sms, streamName, inputFileName);
   }
+#endif
 
+#ifndef DR400
   // A MPEG-2 Transport Stream, coming from a live UDP (raw-UDP or RTP/UDP) source:
   {
     char const* streamName = "mpeg2TransportStreamFromUDPSourceTest";
@@ -354,6 +386,7 @@ int main(int argc, char** argv) {
     *env << "Play this stream using the URL \"" << url << "\"\n";
     delete[] url;
   }
+#endif
 
   // Also, attempt to create a HTTP server for RTSP-over-HTTP tunneling.
   // Try first with the default HTTP port (80), and then with the alternative HTTP

@@ -95,7 +95,9 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
 
   ServerMediaSession* sms = NULL;
   Boolean const reuseSource = False;
-  if (strcmp(extension, ".aac") == 0) {
+	if(false){
+#ifndef DR400
+	}else if (strcmp(extension, ".aac") == 0) {
     // Assumed to be an AAC Audio (ADTS format) file:
     NEW_SMS("AAC Audio");
     sms->addSubsession(ADTSAudioFileServerMediaSubsession::createNew(env, fileName, reuseSource));
@@ -111,11 +113,13 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     // Assumed to be a MPEG-4 Video Elementary Stream file:
     NEW_SMS("MPEG-4 Video");
     sms->addSubsession(MPEG4VideoFileServerMediaSubsession::createNew(env, fileName, reuseSource));
+#endif
   } else if (strcmp(extension, ".264") == 0) {
     // Assumed to be a H.264 Video Elementary Stream file:
     NEW_SMS("H.264 Video");
     OutPacketBuffer::maxSize = 100000; // allow for some possibly large H.264 frames
     sms->addSubsession(H264VideoFileServerMediaSubsession::createNew(env, fileName, reuseSource));
+#ifndef DR400
   } else if (strcmp(extension, ".mp3") == 0) {
     // Assumed to be a MPEG-1 or 2 Audio file:
     NEW_SMS("MPEG-1 or 2 Audio");
@@ -180,6 +184,7 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     while ((smss = demux->newServerMediaSubsession()) != NULL) {
       sms->addSubsession(smss);
     }
+#endif
   }
 
   return sms;
